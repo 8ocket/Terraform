@@ -65,9 +65,16 @@ resource "aws_dynamodb_table" "tflock" {
 # ==========================================
 # 3. 도커 이미지 저장용 ECR 창고
 # ==========================================
+# (추가) 생성할 ECR 창고의 이름들을 리스트로 정의합니다.
+locals {
+  ecr_repos = ["mindlog-fe", "mindlog-be", "mindlog-ai"]
+}
+
 resource "aws_ecr_repository" "app_repo" {
-  name                 = "8ocket-app-repo"
+  for_each             = toset(local.ecr_repos) # (추가) 위 리스트의 개수만큼 반복해서 생성합니다.
+  name                 = each.key               # (수정) 반복되면서 리스트에 적힌 이름이 각각 부여됩니다.
   image_tag_mutability = "MUTABLE"
+  force_delete         = true                   # (추가) 삭제 시 창고 안에 이미지가 남아 있어도 강제로 지울 수 있게 허용합니다.
 
   # (중요) 이미지가 올라올 때 해킹 취약점을 검사합니다. (경고만 해주고 저장을 막지는 않습니다)
   image_scanning_configuration {
@@ -77,7 +84,8 @@ resource "aws_ecr_repository" "app_repo" {
 
 # (중요) 최근 30개 이미지만 남기고 나머지는 자동 삭제하는 수명 주기 정책
 resource "aws_ecr_lifecycle_policy" "app_repo_policy" {
-  repository = aws_ecr_repository.app_repo.name
+  for_each   = aws_ecr_repository.app_repo # (추가) 방금 만든 3개의 ECR 각각에 이 정책을 똑같이 달아줍니다.
+  repository = each.value.name             # (수정) 각 ECR의 이름과 정책을 연결합니다.
 
   policy = jsonencode({
     rules = [{
