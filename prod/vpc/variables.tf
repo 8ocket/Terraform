@@ -9,14 +9,14 @@ variable "env" {
   default     = "prod"
 }
 
-# (중요) AWS 자원들의 기본 뼈대가 될 이름입니다.
+# (핵심 수정) 숫자로 시작하면 안 되는 리소스들을 위해 이름을 영문자로 시작하게 변경합니다.
 variable "vpc_name" {
   description = "VPC의 기본 이름"
   type        = string
-  default     = "8ocket-vpc"
+  default     = "vpc-8ocket" # (수정) 8ocket-vpc -> vpc-8ocket
 }
 
-# (중요) 향후 EKS의 로드밸런서(ALB)가 서브넷을 자동으로 찾기 위해 꼭 필요한 태그용 변수입니다.
+# 향후 EKS의 로드밸런서(ALB)가 서브넷을 자동으로 찾기 위해 꼭 필요한 태그용 변수입니다.
 variable "cluster_name" {
   description = "EKS 클러스터 이름"
   type        = string
@@ -59,21 +59,21 @@ variable "database_subnets" {
 # ==========================================
 # 3. 서브넷 이름 지정 변수
 # ==========================================
-# (중요) AWS VPC 모듈이 자동으로 짓는 이름 대신, 명시적으로 지정하신 이름을 부여하기 위한 리스트입니다.
+# (핵심 수정) 모든 서브넷 이름도 리소스 유형이 먼저 오도록 변경합니다.
 variable "public_subnet_names" {
   description = "퍼블릭 서브넷 이름 목록"
   type        = list(string)
-  default     = ["8ocket-pub-subnet-1", "8ocket-pub-subnet-2", "8ocket-pub-subnet-3"]
+  default     = ["pub-subnet-1-8ocket", "pub-subnet-2-8ocket", "pub-subnet-3-8ocket"]
 }
 
 variable "private_subnet_names" {
   description = "프라이빗(App) 서브넷 이름 목록"
   type        = list(string)
-  default     = ["8ocket-pri-subnet-1", "8ocket-pri-subnet-2", "8ocket-pri-subnet-3"]
+  default     = ["pri-subnet-1-8ocket", "pri-subnet-2-8ocket", "pri-subnet-3-8ocket"]
 }
 
 variable "database_subnet_names" {
   description = "프라이빗(DB) 서브넷 이름 목록"
   type        = list(string)
-  default     = ["8ocket-db-subnet-1", "8ocket-db-subnet-2", "8ocket-db-subnet-3"]
+  default     = ["db-subnet-1-8ocket", "db-subnet-2-8ocket", "db-subnet-3-8ocket"]
 }

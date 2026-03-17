@@ -2,14 +2,14 @@
 
 terraform {
   # ==========================================
-  # [추가된 부분] 테라폼 상태(tfstate) 파일 원격 저장소 설정
+  # 테라폼 상태(tfstate) 파일 원격 저장소 설정
   # ==========================================
   backend "s3" {
-    bucket         = "8ocket-tfstate-s3"           # (필수) 방금 우리가 만든 S3 버킷의 이름을 적어줍니다.
-    key            = "bootstrap/terraform.tfstate" # (필수) S3 금고 안에서 이 파일이 저장될 폴더 경로와 파일 이름입니다.
-    region         = "ap-northeast-2"              # (필수) S3 버킷이 위치한 서울 리전을 명시합니다.
-    encrypt        = true                          # (필수) S3에 저장될 때 파일 내용을 암호화하여 보호합니다.
-    dynamodb_table = "8ocket-tfstate-dynamodb"     # (필수) 동시 수정을 막기 위해 방금 만든 DynamoDB 자물쇠 테이블 이름을 적어줍니다.
+    bucket         = "8ocket-tfstate-s3"           # 상태 파일이 저장될 S3 버킷
+    key            = "bootstrap/terraform.tfstate" # 파일 경로 및 이름
+    region         = "ap-northeast-2"              # 리전 설정
+    encrypt        = true                          # 암호화 활성화
+    dynamodb_table = "8ocket-tfstate-dynamodb"     # 잠금용 DynamoDB 테이블
   }
 
   required_providers {
@@ -28,7 +28,7 @@ provider "aws" {
 # 1. 테라폼 상태 저장용 S3 버킷 및 암호화
 # ==========================================
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "8ocket-tfstate-s3" # 요청하신 이름 규약 적용
+  bucket = "8ocket-tfstate-s3"
 }
 
 resource "aws_s3_bucket_versioning" "tfstate_versioning" {
@@ -38,7 +38,6 @@ resource "aws_s3_bucket_versioning" "tfstate_versioning" {
   }
 }
 
-# (중요) tfstate 파일 내부의 민감 정보(비밀번호 등)를 보호하기 위한 AES256 암호화
 resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate_encryption" {
   bucket = aws_s3_bucket.tfstate.id
   rule {
@@ -53,7 +52,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate_encryptio
 # ==========================================
 resource "aws_dynamodb_table" "tflock" {
   name         = "8ocket-tfstate-dynamodb"
-  billing_mode = "PAY_PER_REQUEST" # (중요) 쓰지 않을 때 요금이 나가지 않는 온디맨드 모드
+  billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
   attribute {
@@ -65,27 +64,24 @@ resource "aws_dynamodb_table" "tflock" {
 # ==========================================
 # 3. 도커 이미지 저장용 ECR 창고
 # ==========================================
-# (추가) 생성할 ECR 창고의 이름들을 리스트로 정의합니다.
 locals {
   ecr_repos = ["mindlog-fe", "mindlog-be", "mindlog-ai"]
 }
 
 resource "aws_ecr_repository" "app_repo" {
-  for_each             = toset(local.ecr_repos) # (추가) 위 리스트의 개수만큼 반복해서 생성합니다.
-  name                 = each.key               # (수정) 반복되면서 리스트에 적힌 이름이 각각 부여됩니다.
+  for_each             = toset(local.ecr_repos)
+  name                 = each.key
   image_tag_mutability = "MUTABLE"
-  force_delete         = true                   # (추가) 삭제 시 창고 안에 이미지가 남아 있어도 강제로 지울 수 있게 허용합니다.
+  force_delete         = true
 
-  # (중요) 이미지가 올라올 때 해킹 취약점을 검사합니다. (경고만 해주고 저장을 막지는 않습니다)
   image_scanning_configuration {
     scan_on_push = true
   }
 }
 
-# (중요) 최근 30개 이미지만 남기고 나머지는 자동 삭제하는 수명 주기 정책
 resource "aws_ecr_lifecycle_policy" "app_repo_policy" {
-  for_each   = aws_ecr_repository.app_repo # (추가) 방금 만든 3개의 ECR 각각에 이 정책을 똑같이 달아줍니다.
-  repository = each.value.name             # (수정) 각 ECR의 이름과 정책을 연결합니다.
+  for_each   = aws_ecr_repository.app_repo
+  repository = each.value.name
 
   policy = jsonencode({
     rules = [{
@@ -104,23 +100,56 @@ resource "aws_ecr_lifecycle_policy" "app_repo_policy" {
 }
 
 # ==========================================
-# 4. GitHub Actions 전용 OIDC 출입증 (Terraform 모듈 사용)
+# 4. GitHub Actions 전용 OIDC 출입증 (수동 리소스 방식)
 # ==========================================
-module "github_oidc_provider" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-github-oidc-provider"
-  version = "~> 5.0"
+
+# (중요) 깃허브 OIDC 공급자 설정은 기존 모듈을 유지하거나 아래처럼 직접 정의할 수 있습니다.
+resource "aws_iam_openid_connect_provider" "github" {
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
+  
+  # (핵심 수정) 깃허브의 최신 지문 2개를 모두 넣어서 인증 실패를 원천 차단합니다.
+  # AWS가 최근 지문을 자동 관리하지만, 수동 리소스에서는 명시하는 것이 가장 확실합니다.
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1", 
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd"
+  ]
 }
 
-module "github_actions_role" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-github-oidc-role"
-  version = "~> 5.0"
+data "aws_iam_policy_document" "github_allow" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity", "sts:TagSession"]
 
-  name = "8ocket-github-actions-role"
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
 
-  # (중요) 8ocket 계정의 Terraform 레포지토리 중 'main' 브랜치에서 실행될 때만 AWS 접근을 허용합니다.
-  subjects = ["8ocket/Terraform:ref:refs/heads/main"]
-
-  policies = {
-    AdministratorAccess = "arn:aws:iam::aws:policy/AdministratorAccess"
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      
+      # (핵심 해결책) 깃허브가 보내는 '환경(approve)' 신분증을 명부에 추가합니다!
+      values   = [
+        "repo:8ocket/Terraform:environment:approve",
+        "repo:8ocket/terraform:environment:approve",
+        # (유지) 만약 환경 설정을 빼고 돌릴 때를 대비해 기존 main 브랜치 값도 남겨둡니다.
+        "repo:8ocket/Terraform:ref:refs/heads/main",
+        "repo:8ocket/terraform:ref:refs/heads/main"
+      ]
+    }
   }
+}
+
+# IAM 역할 생성
+resource "aws_iam_role" "github_actions_role" {
+  name               = "8ocket-github-actions-role"
+  assume_role_policy = data.aws_iam_policy_document.github_allow.json
+}
+
+# 관리자 권한 연결
+resource "aws_iam_role_policy_attachment" "admin_attach" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
