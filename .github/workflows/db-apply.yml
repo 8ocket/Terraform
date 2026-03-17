@@ -1,0 +1,78 @@
+# .github/workflows/db-apply.yml
+
+# (수정) 파이프라인 이름을 DB 전용으로 변경합니다.
+name: "Terraform DB Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+    # (핵심 수정) prod/db 폴더 안의 파일이 변경되었을 때만 실행됩니다.
+    paths:
+      - 'prod/db/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  plan:
+    name: "Terraform Plan (DB)"
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        # (중요) 모든 테라폼 명령어가 db 폴더 안에서 실행되도록 경로를 맞춥니다.
+        working-directory: ./prod/db
+        
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+        
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.14.0"
+          
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "arn:aws:iam::854439979580:role/8ocket-github-actions-role"
+          aws-region: "ap-northeast-2"
+          
+      - name: "Terraform Init"
+        run: terraform init
+        
+      - name: "Terraform Plan"
+        run: terraform plan
+
+  apply:
+    name: "Terraform Apply (DB)"
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: approve
+    
+    defaults:
+      run:
+        working-directory: ./prod/db
+        
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+        
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.14.0"
+          
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "arn:aws:iam::854439979580:role/8ocket-github-actions-role"
+          aws-region: "ap-northeast-2"
+          
+      - name: "Terraform Init"
+        run: terraform init
+        
+      - name: "Terraform Apply"
+        run: terraform apply -auto-approve

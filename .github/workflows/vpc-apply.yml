@@ -1,0 +1,77 @@
+# .github/workflows/vpc-apply.yml
+
+name: "Terraform VPC Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+    # (핵심 수정) 오직 prod/vpc 폴더 안의 파일이 변경되었을 때만 이 스크립트가 돕니다.
+    paths:
+      - 'prod/vpc/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  plan:
+    name: "Terraform Plan (VPC)"
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        # (중요) 이 파이프라인의 모든 작업은 vpc 폴더 안에서만 이루어집니다.
+        working-directory: ./prod/vpc
+        
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+        
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.14.0"
+          
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "arn:aws:iam::854439979580:role/8ocket-github-actions-role"
+          aws-region: "ap-northeast-2"
+          
+      - name: "Terraform Init"
+        run: terraform init
+        
+      - name: "Terraform Plan"
+        run: terraform plan
+
+  apply:
+    name: "Terraform Apply (VPC)"
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: approve
+    
+    defaults:
+      run:
+        working-directory: ./prod/vpc
+        
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+        
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.14.0"
+          
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "arn:aws:iam::854439979580:role/8ocket-github-actions-role"
+          aws-region: "ap-northeast-2"
+          
+      - name: "Terraform Init"
+        run: terraform init
+        
+      - name: "Terraform Apply"
+        run: terraform apply -auto-approve
