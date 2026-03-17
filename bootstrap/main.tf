@@ -118,7 +118,7 @@ module "github_actions_role" {
   name = "8ocket-github-actions-role"
 
   # (중요) 8ocket 계정의 Terraform 레포지토리 중 'main' 브랜치에서 실행될 때만 AWS 접근을 허용합니다.
-  subjects = ["repo:8ocket/Terraform:ref:refs/heads/main"]
+  subjects = ["8ocket/Terraform:ref:refs/heads/main"]
 
   policies = {
     AdministratorAccess = "arn:aws:iam::aws:policy/AdministratorAccess"
