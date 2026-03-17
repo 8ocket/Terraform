@@ -1,0 +1,79 @@
+# prod/db/main.tf
+
+# ==========================================
+# 1. RDS PostgreSQL (공식 모듈 사용)
+# ==========================================
+module "db" {
+  source  = "terraform-aws-modules/rds/aws"
+  version = "~> 6.0"
+
+  identifier = "rds-${var.env}-8ocket" 
+
+  engine               = "postgres"
+  engine_version       = var.db_engine_version
+  family               = "postgres18" # 엔진 버전에 맞는 기본 파라미터 그룹 패밀리
+  major_engine_version = "18"
+  instance_class       = var.db_instance_class
+
+  allocated_storage = var.db_allocated_storage
+  storage_type      = "gp3"
+
+  db_name  = var.db_name
+  username = var.db_user
+  password = var.db_password
+  port     = 5432
+
+  manage_master_user_password = false
+
+  multi_az = false
+
+  db_subnet_group_name   = data.terraform_remote_state.vpc.outputs.database_subnet_group_name
+  vpc_security_group_ids = [data.terraform_remote_state.vpc.outputs.db_sg_id]
+
+  deletion_protection = false
+  skip_final_snapshot = true
+
+  # (수정) 파라미터 커스텀 블록을 제거하여 AWS 기본값을 사용하도록 반영했습니다.
+}
+
+# ==========================================
+# 2. Valkey (ElastiCache 기본 리소스 사용)
+# ==========================================
+resource "aws_elasticache_subnet_group" "valkey" {
+  name       = "valkey-subnet-group-${var.env}-8ocket"
+  subnet_ids = data.terraform_remote_state.vpc.outputs.database_subnets
+}
+
+# (수정) 파라미터 그룹도 최소한의 클러스터 모드 Off 설정만 남기고 기본값을 따릅니다.
+resource "aws_elasticache_parameter_group" "valkey" {
+  name   = "valkey-params-${var.env}-8ocket"
+  family = "valkey8" 
+
+  parameter {
+    name  = "cluster-enabled"
+    value = "no" 
+  }
+}
+
+resource "aws_elasticache_replication_group" "valkey" {
+  replication_group_id = "valkey-${var.env}-8ocket"
+  description          = "Valkey 8.2 single node for 8ocket project"
+  
+  engine               = "valkey"
+  engine_version       = var.redis_engine_version
+  node_type            = var.redis_node_type
+  port                 = 6379
+
+  num_cache_clusters         = 1
+  automatic_failover_enabled = false
+
+  parameter_group_name = aws_elasticache_parameter_group.valkey.name
+  subnet_group_name    = aws_elasticache_subnet_group.valkey.name
+  
+  # (필수) 이 보안 그룹이 있어야 EKS 파드가 Redis에 접속할 수 있습니다.
+  security_group_ids   = [data.terraform_remote_state.vpc.outputs.db_sg_id]
+
+  at_rest_encryption_enabled = true
+  # (수정) 본 서버 구축을 대비하여 데이터 전송 구간 암호화를 미리 켜둡니다.
+  transit_encryption_enabled = true 
+}
