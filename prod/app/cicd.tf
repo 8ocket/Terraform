@@ -33,7 +33,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_pvc" {
     }
   }
   wait_until_bound = false
-  
+
   depends_on = [helm_release.aws_ebs_csi_driver]
 }
 
@@ -117,7 +117,7 @@ resource "helm_release" "jenkins" {
 
   # 초기 관리자 비밀번호 주입
   set {
-    name  = "controller.adminPassword"
+    name  = "controller.admin.password"
     value = var.jenkins_admin_password
   }
 
