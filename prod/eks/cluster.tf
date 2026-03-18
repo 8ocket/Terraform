@@ -41,7 +41,15 @@ module "eks" {
 
   # 4. 필수 시스템 애드온 (AWS 기본값 최신 버전 사용)
   cluster_addons = {
-    vpc-cni                = { most_recent = true }
+    vpc-cni = { 
+      most_recent = true
+      configuration_values = jsonencode({
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+          WARM_PREFIX_TARGET       = "1"
+        }
+      })
+    }
     coredns                = { most_recent = true }
     kube-proxy             = { most_recent = true }
     # Pod Identity Agent를 기본으로 설치하여 IRSA의 복잡함을 덜어냅니다.
@@ -68,6 +76,8 @@ module "eks" {
       labels = {
         "karpenter.sh/capacity-type" = "on-demand"
       }
+      bootstrap_extra_args = "--use-max-pods false"
+      kubelet_extra_args   = "--max-pods=110"
     }
   }
 
