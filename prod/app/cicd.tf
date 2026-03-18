@@ -32,7 +32,8 @@ resource "kubernetes_persistent_volume_claim" "jenkins_pvc" {
       }
     }
   }
-
+  wait_until_bound = false
+  
   depends_on = [helm_release.aws_ebs_csi_driver]
 }
 
