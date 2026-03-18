@@ -44,7 +44,7 @@ variable "chart_version_aws_lbc" {
 variable "chart_version_ebs_csi" {
   description = "AWS EBS CSI Driver Helm 차트 버전"
   type        = string
-  default     = "2.38.0" 
+  default     = "2.56.1" 
 }
 
 variable "chart_version_external_dns" {

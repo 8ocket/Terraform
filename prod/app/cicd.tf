@@ -32,6 +32,8 @@ resource "kubernetes_persistent_volume_claim" "jenkins_pvc" {
       }
     }
   }
+
+  depends_on = [helm_release.aws_ebs_csi_driver]
 }
 
 # ==========================================
@@ -92,6 +94,8 @@ resource "helm_release" "argocd" {
   set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
   */
+
+  depends_on = [helm_release.aws_lbc]
 }
 
 # ==========================================
@@ -156,4 +160,6 @@ resource "helm_release" "jenkins" {
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
   */
+
+  depends_on = [helm_release.aws_lbc]
 }
