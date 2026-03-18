@@ -69,7 +69,7 @@ module "eks" {
       capacity_type  = var.mng_capacity_type
       
       # (핵심) 구형 AL2 대신 신형 AL2023 강제 지정
-      ami_type       = "AL2023_x86_64"
+      ami_type       = "AL2023_x86_64_STANDARD"
 
       labels = {
         "karpenter.sh/capacity-type" = "on-demand"
