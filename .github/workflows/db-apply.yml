@@ -10,6 +10,7 @@ on:
     # (핵심 수정) prod/db 폴더 안의 파일이 변경되었을 때만 실행됩니다.
     paths:
       - 'prod/db/**'
+  workflow_dispatch:
 
 permissions:
   id-token: write
