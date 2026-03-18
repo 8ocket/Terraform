@@ -63,3 +63,9 @@ variable "redis_engine_version" {
   type        = string
   default     = "8.2"
 }
+
+variable "s3_photo_bucket_name" {
+  description = "백엔드 사진 저장용 S3 버킷 이름"
+  type        = string
+  default     = "8ocket-backend-photos-prod" 
+}

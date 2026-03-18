@@ -62,12 +62,3 @@ variable "mng_desired_size" {
   type        = number
   default     = 3 # 3개의 프라이빗(App) 서브넷에 하나씩 배치됩니다.
 }
-
-# ==========================================
-# 4. EKS 애드온(Add-on) 설정
-# ==========================================
-variable "ebs_csi_version" {
-  description = "EBS CSI 드라이버 애드온 버전"
-  type        = string
-  default     = "v1.35.0-eksbuild.1" # EKS 1.34와 호환되는 안정적인 최신 버전입니다.
-}

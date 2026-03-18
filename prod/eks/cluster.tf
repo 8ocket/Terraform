@@ -61,7 +61,7 @@ module "eks" {
 
   # 7. 시스템 파드가 올라갈 3대의 고정 워커 노드 (AL2023 적용)
   eks_managed_node_groups = {
-    default_mng = {
+    mindlog_nodes = {
       min_size       = 1
       max_size       = 3
       desired_size   = var.mng_desired_size

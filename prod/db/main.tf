@@ -91,3 +91,46 @@ resource "aws_elasticache_replication_group" "valkey" {
   kms_key_id = aws_kms_key.db_key.arn
   #kms 키 사용하여 db 에 쓰기
 }
+
+resource "aws_s3_bucket" "backend_photos" {
+  bucket        = var.s3_photo_bucket_name
+  
+  # 버킷 내부에 사진 데이터가 존재하더라도 terraform destroy 시 강제로 모두 삭제합니다.
+  force_destroy = true 
+}
+
+resource "aws_s3_bucket_versioning" "backend_photos" {
+  bucket = aws_s3_bucket.backend_photos.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+
+# ----------------------------------------------------------
+# 3. 이미지 저장용 s3
+
+resource "aws_s3_bucket_public_access_block" "backend_photos_public" {
+  bucket                  = aws_s3_bucket.backend_photos.id
+  block_public_acls       = false
+  ignore_public_acls      = false
+  block_public_policy     = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_policy" "backend_photos_public_read" {
+  bucket     = aws_s3_bucket.backend_photos.id
+  depends_on = [aws_s3_bucket_public_access_block.backend_photos_public]
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Principal = "*"
+        Effect    = "Allow"
+        Action    = ["s3:GetObject"]
+        Resource  = ["${aws_s3_bucket.backend_photos.arn}/*"]
+      }
+    ]
+  })
+}

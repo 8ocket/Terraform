@@ -1,0 +1,77 @@
+# .github/workflows/app-apply.yml
+
+name: "Terraform App Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+    # prod/app 폴더 안의 파일이 변경되었을 때만 실행됩니다.
+    paths:
+      - 'prod/app/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  plan:
+    name: "Terraform Plan (App)"
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        # 모든 테라폼 명령어가 app 폴더 안에서 실행되도록 경로를 맞춥니다.
+        working-directory: ./prod/app
+        
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+        
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.14.0"
+          
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "arn:aws:iam::854439979580:role/8ocket-github-actions-role"
+          aws-region: "ap-northeast-2"
+          
+      - name: "Terraform Init"
+        run: terraform init
+        
+      - name: "Terraform Plan"
+        run: terraform plan
+
+  apply:
+    name: "Terraform Apply (App)"
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: approve
+    
+    defaults:
+      run:
+        working-directory: ./prod/app
+        
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+        
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.14.0"
+          
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "arn:aws:iam::854439979580:role/8ocket-github-actions-role"
+          aws-region: "ap-northeast-2"
+          
+      - name: "Terraform Init"
+        run: terraform init
+        
+      - name: "Terraform Apply"
+        run: terraform apply -auto-approve
