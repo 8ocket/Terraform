@@ -161,3 +161,48 @@ resource "aws_security_group" "vpc_endpoint_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+# ------------------------------------------
+# prod/vpc/efs.tf
+
+# 1. EFS 전용 보안 그룹 (NFS 포트 2049 개방)
+resource "aws_security_group" "efs_sg" {
+  name        = "${var.env}-efs-sg"
+  description = "Security group for EFS"
+  vpc_id      = module.vpc.vpc_id
+
+  # VPC 내부의 EKS 워커 노드들이 EFS에 접속할 수 있도록 허용합니다.
+  ingress {
+    from_port   = 2049
+    to_port     = 2049
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# 2. EFS 파일 시스템 본체 생성
+resource "aws_efs_file_system" "main" {
+  # 재생성 시 충돌을 막기 위한 고유 토큰입니다.
+  creation_token = "${var.env}-8ocket-efs"
+  # 저장되는 모든 데이터를 안전하게 암호화합니다.
+  encrypted      = true
+
+  tags = {
+    Name = "${var.env}-8ocket-efs"
+  }
+}
+
+# 3. 프라이빗(App) 서브넷 3곳에 EFS 연결 단자(Mount Target) 생성
+resource "aws_efs_mount_target" "app_subnets" {
+  # VPC 모듈이 만든 3개의 프라이빗 서브넷 개수만큼 반복해서 단자를 만듭니다.
+  count           = length(module.vpc.private_subnets)
+  file_system_id  = aws_efs_file_system.main.id
+  subnet_id       = module.vpc.private_subnets[count.index]
+  security_groups = [aws_security_group.efs_sg.id]
+}

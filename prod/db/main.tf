@@ -1,5 +1,14 @@
 # prod/db/main.tf
+resource "aws_kms_key" "db_key" {
+  description             = "KMS key for RDS and Valkey encryption"
+  deletion_window_in_days = 7
+  enable_key_rotation     = true # 매년 자동으로 키를 바꿔주는 보안 설정
+}
 
+resource "aws_kms_alias" "db_key_alias" {
+  name          = "alias/${var.env}-db-key"
+  target_key_id = aws_kms_key.db_key.key_id
+}
 # ==========================================
 # 1. RDS PostgreSQL (공식 모듈 사용)
 # ==========================================
@@ -33,6 +42,8 @@ module "db" {
   deletion_protection = false
   skip_final_snapshot = true
 
+  kms_key_id = aws_kms_key.db_key.arn
+  # kms key 사용하여 rds 에 쓰기작업
   # (수정) 파라미터 커스텀 블록을 제거하여 AWS 기본값을 사용하도록 반영했습니다.
 }
 
@@ -76,4 +87,7 @@ resource "aws_elasticache_replication_group" "valkey" {
   at_rest_encryption_enabled = true
   # (수정) 본 서버 구축을 대비하여 데이터 전송 구간 암호화를 미리 켜둡니다.
   transit_encryption_enabled = true 
+
+  kms_key_id = aws_kms_key.db_key.arn
+  #kms 키 사용하여 db 에 쓰기
 }

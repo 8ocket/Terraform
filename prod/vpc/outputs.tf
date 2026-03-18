@@ -41,3 +41,9 @@ output "db_sg_id" {
   description = "데이터베이스용 보안 그룹의 ID"
   value       = aws_security_group.db_sg.id
 }
+
+
+output "efs_id" {
+  description = "생성된 EFS의 고유 ID"
+  value       = aws_efs_file_system.main.id
+}
