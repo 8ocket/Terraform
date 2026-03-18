@@ -214,3 +214,59 @@ resource "kubernetes_storage_class" "gp3" {
   # csi 드라이버가 완전히 설치된 이후에 생성되도록 의존성을 부여합니다.
   depends_on = [helm_release.aws_ebs_csi_driver]
 }
+
+# 4. AWS EFS CSI Driver & 동적 프로비저닝 스토리지 클래스
+
+resource "kubernetes_namespace" "efs_csi_driver" {
+  metadata { name = "efs-csi-driver" }
+}
+
+resource "aws_iam_role" "efs_csi" {
+  name               = "${var.env}-efs-csi-role"
+  assume_role_policy = data.aws_iam_policy_document.pod_identity_trust.json
+}
+
+# EFS 제어를 위한 AWS 공식 관리형 정책 연결
+resource "aws_iam_role_policy_attachment" "efs_csi_base" {
+  role       = aws_iam_role.efs_csi.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
+}
+
+resource "aws_eks_pod_identity_association" "efs_csi" {
+  cluster_name    = data.terraform_remote_state.eks.outputs.cluster_name
+  namespace       = kubernetes_namespace.efs_csi_driver.metadata[0].name
+  service_account = "efs-csi-controller-sa"
+  role_arn        = aws_iam_role.efs_csi.arn
+}
+
+resource "helm_release" "aws_efs_csi_driver" {
+  name       = "aws-efs-csi-driver"
+  repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver/"
+  chart      = "aws-efs-csi-driver"
+  version    = "3.0.3"
+  namespace  = kubernetes_namespace.efs_csi_driver.metadata[0].name
+  timeout    = 600
+
+  set {
+    name  = "controller.serviceAccount.name"
+    value = "efs-csi-controller-sa"
+  }
+}
+
+# 파드가 EFS를 요청(PVC)하면 자동으로 하위 폴더(Access Point)를 쪼개서 생성해주는 규칙
+resource "kubernetes_storage_class" "efs" {
+  metadata {
+    name = "efs"
+  }
+  storage_provisioner = "efs.csi.aws.com"
+  
+  parameters = {
+    provisioningMode = "efs-ap"
+    # VPC 계층에서 만들어진 EFS ID를 상태 파일에서 동적으로 참조합니다.
+    fileSystemId     = data.terraform_remote_state.vpc.outputs.efs_id
+    directoryPerms   = "700"
+  }
+
+  # 드라이버(통역사)가 먼저 설치된 후에 스토리지 클래스가 만들어지도록 순서 강제
+  depends_on = [helm_release.aws_efs_csi_driver]
+}

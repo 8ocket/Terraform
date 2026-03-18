@@ -109,6 +109,7 @@ resource "helm_release" "jenkins" {
   version    = var.chart_version_jenkins
   namespace  = kubernetes_namespace.jenkins.metadata[0].name
 
+  timeout    = 600
   # 테라폼으로 직접 만든 분리형 20GB 디스크(PVC) 강제 연결
   set {
     name  = "persistence.existingClaim"
@@ -141,6 +142,15 @@ resource "helm_release" "jenkins" {
   set {
     name  = "controller.installPlugins[1]"
     value = "workflow-aggregator:latest"
+  }
+
+  set {
+    name  = "controller.resources.requests.cpu"
+    value = "250m"
+  }
+  set {
+    name  = "controller.resources.requests.memory"
+    value = "1024Mi"
   }
 
   # 파드가 EC2 노드를 마비시키는 것을 막기 위한 자원 한계선 설정
