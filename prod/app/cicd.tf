@@ -137,11 +137,11 @@ resource "helm_release" "jenkins" {
   # (핵심) 필수 플러그인 부팅 시 자동 설치 (JCasC)
   set {
     name  = "controller.installPlugins[0]"
-    value = "git:latest"
+    value = "git"
   }
   set {
     name  = "controller.installPlugins[1]"
-    value = "workflow-aggregator:latest"
+    value = "workflow-aggregator"
   }
 
   set {
