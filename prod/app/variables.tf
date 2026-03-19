@@ -38,7 +38,7 @@ variable "jenkins_admin_password" {
 variable "chart_version_aws_lbc" {
   description = "AWS Load Balancer Controller Helm 차트 버전"
   type        = string
-  default     = "1.9.2" # App v2.11.0 기반의 안정적인 최신 릴리즈
+  default     = "3.1.0"
 }
 
 variable "chart_version_ebs_csi" {
@@ -50,7 +50,7 @@ variable "chart_version_ebs_csi" {
 variable "chart_version_external_dns" {
   description = "ExternalDNS Helm 차트 버전"
   type        = string
-  default     = "1.15.0"
+  default     = "1.20.0"
 }
 
 
@@ -59,25 +59,25 @@ variable "chart_version_external_dns" {
 variable "chart_version_karpenter" {
   description = "Karpenter 오토스케일러 Helm 차트 버전"
   type        = string
-  default     = "1.1.1" # v1.x 이상 최신 안정화 버전
+  default     = "1.9.0" 
 }
 
 variable "chart_version_keda" {
   description = "KEDA (이벤트 기반 스케일러) Helm 차트 버전"
   type        = string
-  default     = "2.15.1"
+  default     = "2.19.1"
 }
 
 variable "chart_version_argocd" {
   description = "ArgoCD Helm 차트 버전"
   type        = string
-  default     = "7.7.5"
+  default     = "9.4.10"
 }
 
 variable "chart_version_jenkins" {
   description = "Jenkins Helm 차트 버전"
   type        = string
-  default     = "5.7.1"
+  default     = "5.9.8"
 }
 
 
@@ -86,5 +86,5 @@ variable "chart_version_jenkins" {
 variable "chart_version_kube_prometheus_stack" {
   description = "Kube-Prometheus-Stack Helm 차트 버전"
   type        = string
-  default     = "67.4.0" # Kubernetes 1.34 와 완벽히 호환되는 최신 버전
+  default     = "82.10.5" 
 }

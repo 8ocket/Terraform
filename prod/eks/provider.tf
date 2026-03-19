@@ -4,7 +4,6 @@ terraform {
   # 테라폼 최소 요구 버전
   required_version = ">= 1.0.0"
 
-  # 인프라(EKS 뼈대)만 생성하므로 오직 AWS 통역사 하나만 호출합니다.
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -22,7 +21,7 @@ terraform {
   }
 }
 
-# 1. AWS 통역사 설정
+# 1. AWS 설정
 provider "aws" {
   region = "ap-northeast-2"
 

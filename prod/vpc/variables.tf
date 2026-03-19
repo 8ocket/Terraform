@@ -9,7 +9,7 @@ variable "env" {
   default     = "prod"
 }
 
-# (핵심 수정) 숫자로 시작하면 안 되는 리소스들을 위해 이름을 영문자로 시작하게 변경합니다.
+
 variable "vpc_name" {
   description = "VPC의 기본 이름"
   type        = string
@@ -59,7 +59,7 @@ variable "database_subnets" {
 # ==========================================
 # 3. 서브넷 이름 지정 변수
 # ==========================================
-# (핵심 수정) 모든 서브넷 이름도 리소스 유형이 먼저 오도록 변경합니다.
+
 variable "public_subnet_names" {
   description = "퍼블릭 서브넷 이름 목록"
   type        = list(string)

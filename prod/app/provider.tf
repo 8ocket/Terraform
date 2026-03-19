@@ -4,7 +4,6 @@ terraform {
   # 테라폼 최소 요구 버전
   required_version = ">= 1.0.0"
 
-  # 이 폴더에서 사용할 4명의 통역사(Provider)를 정의합니다.
   required_providers {
     # 1. AWS 자원(IAM, Route53 등) 생성용
     aws = {
@@ -39,7 +38,7 @@ terraform {
 }
 
 
-# 1. AWS 통역사 설정
+# 1. AWS 설정
 
 provider "aws" {
   region = "ap-northeast-2"
@@ -57,7 +56,7 @@ provider "aws" {
 }
 
 
-# 2. 쿠버네티스(Kubernetes) 통역사 설정
+# 2. 쿠버네티스(Kubernetes) 설정
 
 provider "kubernetes" {
   # data.tf에서 읽어온 EKS 클러스터 주소를 동적으로 주입
@@ -73,7 +72,7 @@ provider "kubernetes" {
 }
 
 
-# 3. 헬름(Helm) 통역사 설정
+# 3. 헬름(Helm) 설정
 
 provider "helm" {
   kubernetes {
@@ -89,7 +88,7 @@ provider "helm" {
 }
 
 
-# 4. Kubectl 통역사 설정 (순수 YAML용)
+# 4. Kubectl 설정 (순수 YAML용)
 
 provider "kubectl" {
   host                   = data.terraform_remote_state.eks.outputs.cluster_endpoint

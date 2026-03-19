@@ -60,47 +60,7 @@ resource "aws_eks_pod_identity_association" "jenkins" {
 }
 
 # ==========================================
-# 4. ArgoCD 헬름(Helm) 차트 설치
-# ==========================================
-resource "helm_release" "argocd" {
-  name       = "argocd"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo-cd"
-  version    = var.chart_version_argocd
-  namespace  = kubernetes_namespace.argocd.metadata[0].name
-
-  # 관리자 초기 비밀번호 주입 (bcrypt 암호화 필수)
-  set {
-    name  = "configs.secret.argocdServerAdminPassword"
-    value = bcrypt(var.argocd_admin_password)
-  }
-
-  # (핵심) 향후 ALB 연결 시 무한 새로고침(Redirect Loop) 에러 방지
-  set {
-    name  = "server.insecure"
-    value = "true"
-  }
-
-  # 향후 Jenkins의 CLI 원격 조종을 위한 gRPC 통신 개방
-  set {
-    name  = "server.extraArgs[0]"
-    value = "--insecure"
-  }
-
-  # 향후 ALB 도메인 연결을 위한 Ingress 설정 (현재는 포트포워딩 테스트를 위해 주석 처리)
-  /*
-  set { name = "server.ingress.enabled", value = "true" }
-  set { name = "server.ingress.ingressClassName", value = "alb" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
-  */
-
-  depends_on = [helm_release.aws_lbc]
-}
-
-# ==========================================
-# 5. Jenkins 헬름(Helm) 차트 설치
+# 4. Jenkins 헬름(Helm) 차트 설치
 # ==========================================
 resource "helm_release" "jenkins" {
   name       = "jenkins"
@@ -134,16 +94,6 @@ resource "helm_release" "jenkins" {
     value = "jenkins"
   }
 
-  # (핵심) 필수 플러그인 부팅 시 자동 설치 (JCasC)
-  set {
-    name  = "controller.installPlugins[0]"
-    value = "git"
-  }
-  set {
-    name  = "controller.installPlugins[1]"
-    value = "workflow-aggregator"
-  }
-
   set {
     name  = "controller.resources.requests.cpu"
     value = "250m"
@@ -170,6 +120,39 @@ resource "helm_release" "jenkins" {
   set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
+  */
+
+  depends_on = [helm_release.aws_lbc]
+}
+
+# ==========================================
+# 5. ArgoCD 헬름(Helm) 차트 설치
+# ==========================================
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  version    = var.chart_version_argocd
+  namespace  = kubernetes_namespace.argocd.metadata[0].name
+
+  # 관리자 초기 비밀번호 주입 (bcrypt 암호화 필수)
+  set {
+    name  = "configs.secret.argocdServerAdminPassword"
+    value = bcrypt(var.argocd_admin_password)
+  }
+
+  set {
+    name  = "configs.params.server\\.insecure"
+    value = "true"
+  }
+
+  # 향후 ALB 도메인 연결을 위한 Ingress 설정 (현재는 포트포워딩 테스트를 위해 주석 처리)
+  /*
+  set { name = "server.ingress.enabled", value = "true" }
+  set { name = "server.ingress.ingressClassName", value = "alb" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
   */
 
   depends_on = [helm_release.aws_lbc]

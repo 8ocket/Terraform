@@ -27,7 +27,7 @@ variable "cluster_version" {
 variable "cluster_endpoint_public_access_cidrs" {
   description = "EKS API 서버 정문(퍼블릭) 개방 범위"
   type        = list(string)
-  default     = ["0.0.0.0/0"] # 누구나 노크는 가능하지만, IAM 인증을 통과해야만 들어올 수 있습니다.
+  default     = ["0.0.0.0/0"] 
 }
 
 variable "cloudwatch_log_retention_days" {

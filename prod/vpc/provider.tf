@@ -7,7 +7,6 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      # 약속한 AWS Provider 버전
       version = "~> 5.0"
     }
   }
