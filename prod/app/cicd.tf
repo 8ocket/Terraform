@@ -71,6 +71,7 @@ resource "helm_release" "jenkins" {
 
   timeout    = 600
   # 테라폼으로 직접 만든 분리형 20GB 디스크(PVC) 강제 연결
+  
   set {
     name  = "persistence.existingClaim"
     value = kubernetes_persistent_volume_claim.jenkins_pvc.metadata[0].name
@@ -139,7 +140,10 @@ set {
     value = aws_wafv2_web_acl.main.arn 
   }
   */
-  depends_on = [helm_release.aws_lbc]
+  depends_on = [
+    helm_release.aws_lbc,
+    helm_release.aws_ebs_csi_driver
+  ]
 }
 
 # ==========================================
