@@ -113,15 +113,32 @@ resource "helm_release" "jenkins" {
     value = "2048Mi"
   }
 
+set {
+    # 테라폼 문법상 마침표(.)는 역슬래시 2개(\\)로 이스케이프해야 에러가 안 납니다.
+    name  = "nodeSelector.karpenter\\.sh/capacity-type"
+    value = "on-demand"
+  }
   # 향후 ALB 도메인 연결을 위한 Ingress 설정 (주석 처리)
-  /*
+/*
   set { name = "controller.ingress.enabled", value = "true" }
   set { name = "controller.ingress.ingressClassName", value = "alb" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
+  
+  # 목적지 주소 설정
+  set { name = "controller.ingress.hostName", value = "jenkins.${var.domain_name}" }
+  
+  # HTTPS 인증서 설정 (나중에 실제 발급받은 ARN으로 변경하세요)
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn", value = "arn:aws:acm:ap-northeast-2:내계정번호:certificate/인증서-고유번호" }
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports", value = "[{\"HTTPS\":443}, {\"HTTP\":80}]" }
+  
+  # WAF 고유번호(ARN) 연동
+  set { 
+    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
+    value = aws_wafv2_web_acl.main.arn 
+  }
   */
-
   depends_on = [helm_release.aws_lbc]
 }
 
@@ -146,13 +163,40 @@ resource "helm_release" "argocd" {
     value = "true"
   }
 
-  # 향후 ALB 도메인 연결을 위한 Ingress 설정 (현재는 포트포워딩 테스트를 위해 주석 처리)
-  /*
+set {
+    # 테라폼 문법상 마침표(.)는 역슬래시 2개(\\)로 이스케이프해야 에러가 안 납니다.
+    name  = "nodeSelector.karpenter\\.sh/capacity-type"
+    value = "on-demand"
+  }
+
+  set {
+    name  = "configs.cm.resource\\.customizations\\.ignoreDifferences\\.apps_Deployment"
+    value = "jqPathExpressions:\n- .spec.replicas"
+  }
+  
+  set {
+    name  = "configs.cm.resource\\.customizations\\.ignoreDifferences\\.apps_StatefulSet"
+    value = "jqPathExpressions:\n- .spec.replicas"
+  }
+/*
   set { name = "server.ingress.enabled", value = "true" }
   set { name = "server.ingress.ingressClassName", value = "alb" }
   set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
   set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
+  
+  # 목적지 주소 설정
+  set { name = "server.ingress.hosts[0]", value = "argocd.${var.domain_name}" }
+  
+  # HTTPS 인증서 설정 (나중에 실제 발급받은 ARN으로 변경하세요)
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn", value = "arn:aws:acm:ap-northeast-2:내계정번호:certificate/인증서-고유번호" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports", value = "[{\"HTTPS\":443}, {\"HTTP\":80}]" }
+  
+    # WAF 고유번호(ARN) 연동
+  set { 
+    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
+    value = aws_wafv2_web_acl.main.arn 
+  }
   */
 
   depends_on = [helm_release.aws_lbc]

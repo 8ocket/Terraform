@@ -15,15 +15,10 @@ terraform {
 
   # (중요) 테라폼 상태 파일(뇌)을 S3 금고에 안전하게 보관하는 설정입니다.
   backend "s3" {
-    # 상태 파일이 저장될 S3 버킷 이름입니다.
     bucket         = "8ocket-tfstate-s3"
-    # (핵심) vpc 폴더와 덮어쓰기 충돌이 나지 않도록 db 전용 폴더 경로로 격리했습니다.
     key            = "prod/db/terraform.tfstate"
-    # S3 버킷이 위치한 서울 리전입니다.
     region         = "ap-northeast-2"
-    # 파일 내용을 알아볼 수 없게 암호화합니다.
     encrypt        = true
-    # 동시 수정을 막아주는 DynamoDB 자물쇠 테이블 이름입니다.
     dynamodb_table = "8ocket-tfstate-dynamodb"
   }
 }

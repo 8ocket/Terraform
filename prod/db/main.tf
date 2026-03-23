@@ -9,6 +9,20 @@ resource "aws_kms_alias" "db_key_alias" {
   name          = "alias/${var.env}-db-key"
   target_key_id = aws_kms_key.db_key.key_id
 }
+
+# ==========================================
+# (추가) RDS TLS(SSL) 강제 통신을 위한 커스텀 파라미터 그룹
+# ==========================================
+resource "aws_db_parameter_group" "rds_postgres" {
+  name   = "rds-params-${var.env}-8ocket"
+  family = "postgres18" # 아래 RDS 모듈의 family 버전에 맞춥니다.
+
+  parameter {
+    name  = "rds.force_ssl"
+    value = "1" # 1로 설정 시 평문 통신을 거부하고 TLS 암호화 통신만 허용
+  }
+}
+
 # ==========================================
 # 1. RDS PostgreSQL (공식 모듈 사용)
 # ==========================================
@@ -45,6 +59,11 @@ module "db" {
   kms_key_id = aws_kms_key.db_key.arn
   # kms key 사용하여 rds 에 쓰기작업
   # (수정) 파라미터 커스텀 블록을 제거하여 AWS 기본값을 사용하도록 반영했습니다.
+  
+  # ==========================================
+  # (추가) 위에서 생성한 커스텀 파라미터 그룹을 RDS에 연결합니다.
+  # ==========================================
+  parameter_group_name = aws_db_parameter_group.rds_postgres.name
 }
 
 # ==========================================
@@ -92,6 +111,9 @@ resource "aws_elasticache_replication_group" "valkey" {
   #kms 키 사용하여 db 에 쓰기
 }
 
+# ----------------------------------------------------------
+# 3.사진 저장용 s3
+
 resource "aws_s3_bucket" "backend_photos" {
   bucket        = var.s3_photo_bucket_name
   
@@ -106,9 +128,6 @@ resource "aws_s3_bucket_versioning" "backend_photos" {
   }
 }
 
-
-# ----------------------------------------------------------
-# 3. 이미지 저장용 s3
 
 resource "aws_s3_bucket_public_access_block" "backend_photos_public" {
   bucket                  = aws_s3_bucket.backend_photos.id

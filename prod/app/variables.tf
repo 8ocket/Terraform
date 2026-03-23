@@ -10,7 +10,7 @@ variable "env" {
 }
 
 variable "domain_name" {
-  description = "메인 서비스 도메인 주소 (향후 도메인 구매/Route53 등록 후 여기에 입력하세요. 예: testkt.cloud)"
+  description = "메인 서비스 도메인 주소 (향후 도메인 구매/Route53 등록 후 여기에 입력하세요."
   type        = string
   default     = "" 
 }
@@ -62,11 +62,6 @@ variable "chart_version_karpenter" {
   default     = "1.9.0" 
 }
 
-variable "chart_version_keda" {
-  description = "KEDA (이벤트 기반 스케일러) Helm 차트 버전"
-  type        = string
-  default     = "2.19.1"
-}
 
 variable "chart_version_argocd" {
   description = "ArgoCD Helm 차트 버전"
@@ -78,13 +73,4 @@ variable "chart_version_jenkins" {
   description = "Jenkins Helm 차트 버전"
   type        = string
   default     = "5.9.8"
-}
-
-
-# 5. 모니터링 앱 버전
-
-variable "chart_version_kube_prometheus_stack" {
-  description = "Kube-Prometheus-Stack Helm 차트 버전"
-  type        = string
-  default     = "82.10.5" 
 }
