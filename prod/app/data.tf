@@ -49,18 +49,19 @@ data "aws_eks_cluster" "cluster" {
 # 4. Route53 도메인 및 ACM 인증서 불러오기
 
 # ExternalDNS가 도메인을 조작할 수 있도록 Route53 호스팅 영역 정보를 찾습니다.
+# (주의) 아직 발급받은 인증서가 없으므로 임시로 주석 처리합니다.
+/*
 data "aws_route53_zone" "main" {
-  name         = "testkt.cloud" 
+  name         = "test." 
   private_zone = false # 퍼블릭 도메인이므로 false로 설정합니다.
 }
 
-# (주의) 아직 발급받은 인증서가 없으므로 임시로 주석 처리합니다.
-/*
+
 data "aws_acm_certificate" "main" {
-  domain   = "testkt.cloud"
+  domain   = "test."
   
   # 만약 발급받으실 때 와일드카드 인증서로 받으셨다면 아래 줄을 대신 사용하세요.
-  # domain   = "*.testkt.cloud" 
+  # domain   = "*.test." 
   
   statuses = ["ISSUED"] # 발급 완료된 정상 인증서만 가져옵니다.
   most_recent = true    # 가장 최근에 발급된 것을 선택합니다.

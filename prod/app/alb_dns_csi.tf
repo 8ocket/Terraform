@@ -76,7 +76,7 @@ resource "helm_release" "aws_lbc" {
 
 
 # 2. ExternalDNS
-
+/*
 resource "kubernetes_namespace" "externaldns" {
   metadata { name = "externaldns" }
 }
@@ -137,7 +137,7 @@ resource "helm_release" "external_dns" {
     value = data.terraform_remote_state.eks.outputs.cluster_name
   }
 }
-
+*/
 
 # 3. EBS CSI Driver & 기본 gp3 설정
 
