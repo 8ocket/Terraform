@@ -22,6 +22,16 @@ variable "monitoring_namespace" {
   default     = "monitoring"
 }
 
+variable "newrelic_namespace" {
+  type    = string
+  default = "newrelic"
+}
+
+variable "newrelic_license_key" {
+  type      = string
+  sensitive = true
+}
+
 variable "keda_namespace" {
   description = "KEDA 오토스케일러가 배포될 쿠버네티스 네임스페이스"
   type        = string
@@ -42,4 +52,9 @@ variable "chart_version_keda" {
   description = "KEDA (이벤트 기반 스케일러) Helm 차트 버전"
   type        = string
   default     = "2.19.0"  # (요청 사항) 공식 차트 릴리즈 안정화 버전 반영
+}
+
+variable "chart_version_newrelic" {
+  type    = string
+  default = "6.0.42"
 }

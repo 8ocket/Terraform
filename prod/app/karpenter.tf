@@ -60,8 +60,6 @@ resource "helm_release" "karpenter" {
 # 3. EC2NodeClass: 노드의 하드웨어 스펙 (레시피)
 # ==========================================
 resource "kubectl_manifest" "karpenter_node_class" {
-  # (수정) 테라폼 Plan 단계에서 아직 존재하지 않는 CRD 문법을 검사하려다 에러나는 것을 방지
-  ignore_api_version_check = true
   
   yaml_body = <<-YAML
     apiVersion: karpenter.k8s.aws/v1
@@ -99,8 +97,6 @@ resource "kubectl_manifest" "karpenter_node_class" {
 # 4. NodePool: 오토스케일링 규칙 (메뉴판)
 # ==========================================
 resource "kubectl_manifest" "karpenter_node_pool" {
-  # (수정) 테라폼 Plan 단계에서 아직 존재하지 않는 CRD 문법을 검사하려다 에러나는 것을 방지
-  ignore_api_version_check = true
   
   yaml_body = <<-YAML
     apiVersion: karpenter.sh/v1
