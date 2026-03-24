@@ -125,7 +125,7 @@ resource "kubectl_manifest" "karpenter_node_pool" {
             # 4. 구형 인스턴스(1~3세대) 배제, 4세대 이상 최신 장비만 허용
             - key: karpenter.k8s.aws/instance-generation
               operator: Gt
-              values: ["4"]
+              values: ["2"]
               
       # (요청 사항) CPU 1000개 도달 시 무한 확장 정지 (요금 폭탄 방지)
       limits:
