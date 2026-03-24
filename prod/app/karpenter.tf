@@ -67,12 +67,12 @@ resource "kubectl_manifest" "karpenter_node_class" {
     metadata:
       name: default
     spec:
-      # (요청 사항) 구형 AL2 대신 최신 AL2023 강제 적용
       amiFamily: AL2023
-      
+      amiSelectorTerms:
+        - alias: al2023@latest
+
       role: "${var.env}-karpenter-node"
       
-      # (요청 사항) 기존 EKS 네트워크에 배치 (자동 탐색)
       subnetSelectorTerms:
         - tags:
             karpenter.sh/discovery: "${data.terraform_remote_state.eks.outputs.cluster_name}"
@@ -80,7 +80,6 @@ resource "kubectl_manifest" "karpenter_node_class" {
         - tags:
             karpenter.sh/discovery: "${data.terraform_remote_state.eks.outputs.cluster_name}"
             
-      # (요청 사항) 기본 하드디스크 gp3 50GB 강제
       blockDeviceMappings:
         - deviceName: /dev/xvda
           ebs:

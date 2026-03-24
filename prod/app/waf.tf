@@ -2,7 +2,7 @@
 
 resource "aws_wafv2_web_acl" "main" {
   name        = "prod-waf-8ocket"
-  description = "콘솔 관리용 WAF"
+  description = "console management WAF"
   scope       = "REGIONAL" # ALB에 붙일 것이므로 리전(Regional)으로 고정
 
   # 기본적으로 모든 트래픽을 통과시킴 (콘솔에서 변경 가능)
