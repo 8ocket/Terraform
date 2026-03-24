@@ -35,11 +35,6 @@ module "eks" {
         }
       }
     }
-    karpenter_node = {
-      # 카펜터 노드가 가질 IAM 신분증(Role)의 전체 고유 번호(ARN)를 명시
-      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.env}-karpenter-node"
-      type          = "EC2_LINUX"
-    }
   }
 
   # 4. 필수 시스템 애드온 (파드 개수 제한 해제용 vpc-cni 설정 포함)
