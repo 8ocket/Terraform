@@ -1,0 +1,67 @@
+# .github/workflows/apply-all.yml
+
+name: "Terraform Prod Apply All"
+
+on:
+  workflow_dispatch: 
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  apply_all:
+    name: "Terraform Apply All (Sequential)"
+    runs-on: ubuntu-latest
+    
+    environment: approve 
+    
+    steps:
+      - name: "Checkout Code"
+        uses: actions/checkout@v3
+        
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.14.0"
+          
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: "arn:aws:iam::854439979580:role/8ocket-github-actions-role"
+          aws-region: "ap-northeast-2"
+
+      # -----------------------------------------------------------------
+
+      - name: "1. Apply VPC"
+        working-directory: ./prod/vpc
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: "2. Apply DB"
+        working-directory: ./prod/db
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: "3. Apply EKS"
+        working-directory: ./prod/eks
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: "Update Kubeconfig"
+        run: aws eks update-kubeconfig --region ap-northeast-2 --name mindlog
+
+      - name: "4. Apply App"
+        working-directory: ./prod/app
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: "5. Apply Ops"
+        working-directory: ./prod/ops
+        run: |
+          terraform init
+          terraform apply -auto-approve
