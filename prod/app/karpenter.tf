@@ -57,7 +57,7 @@ resource "helm_release" "karpenter" {
 }
 
 # ==========================================
-# 3. EC2NodeClass: 노드의 하드웨어 스펙 (레시피)
+# 3. EC2NodeClass: 노드의 하드웨어 스펙 
 # ==========================================
 resource "kubectl_manifest" "karpenter_node_class" {
   
@@ -87,13 +87,15 @@ resource "kubectl_manifest" "karpenter_node_class" {
             volumeType: gp3
             encrypted: true
             deleteOnTermination: true
+      tags:
+        Name: "mindlog-karpenter-node"
   YAML
 
   depends_on = [helm_release.karpenter]
 }
 
 # ==========================================
-# 4. NodePool: 오토스케일링 규칙 (메뉴판)
+# 4. NodePool: 오토스케일링 규칙 
 # ==========================================
 resource "kubectl_manifest" "karpenter_node_pool" {
   
@@ -118,14 +120,13 @@ resource "kubectl_manifest" "karpenter_node_pool" {
             - key: kubernetes.io/arch
               operator: In
               values: ["amd64"]
-            # 3. (요청 사항) 비싸고 특이한 노드 배제, 범용(c, m, r, t) 패밀리만 허용
-            - key: karpenter.k8s.aws/instance-family
+            # 3. (요청 사항) 비싸고 특이한 노드 배제
+            - key: karpenter.k8s.aws/instance-category
               operator: In
               values: ["c", "m", "r", "t"]
-            # 4. 구형 인스턴스(1~3세대) 배제, 4세대 이상 최신 장비만 허용
-            - key: karpenter.k8s.aws/instance-generation
-              operator: Gt
-              values: ["2"]
+            - key: karpenter.k8s.aws/instance-size
+              operator: In
+              values: ["nano", "micro", "small", "medium", "large", "xlarge", "2xlarge"]
               
       # (요청 사항) CPU 1000개 도달 시 무한 확장 정지 (요금 폭탄 방지)
       limits:
