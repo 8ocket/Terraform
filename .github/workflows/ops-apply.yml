@@ -45,6 +45,8 @@ jobs:
         
       - name: "Terraform Plan"
         run: terraform plan
+        env:
+          TF_VAR_newrelic_license_key: ${{ secrets.NEWRELIC_LICENSE_KEY }}
 
   apply:
     name: "Terraform Apply (Ops)"
@@ -76,3 +78,5 @@ jobs:
         
       - name: "Terraform Apply"
         run: terraform apply -auto-approve
+        env:
+          TF_VAR_newrelic_license_key: ${{ secrets.NEWRELIC_LICENSE_KEY }}

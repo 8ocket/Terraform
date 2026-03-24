@@ -9,7 +9,7 @@ terraform {
     bucket         = "8ocket-tfstate-s3"
     key            = "prod/ops/terraform.tfstate" # 기존 app 폴더와 겹치지 않는 독립된 장부
     region         = "ap-northeast-2"
-    dynamodb_table = "8ocket-tfstate-lock"        # 동시 작업 충돌 방지용 자물쇠
+    dynamodb_table = "8ocket-tfstate-dynamodb"        # 동시 작업 충돌 방지용 자물쇠
     encrypt        = true
   }
 
