@@ -119,27 +119,30 @@ set {
     name  = "nodeSelector.karpenter\\.sh/capacity-type"
     value = "on-demand"
   }
-  # 향후 ALB 도메인 연결을 위한 Ingress 설정 (주석 처리)
-/*
-  set { name = "controller.ingress.enabled", value = "true" }
+  
+  
+  # ALB 도메인 연결을 위한 Ingress 설정
+set { name = "controller.ingress.enabled", value = "true" }
   set { name = "controller.ingress.ingressClassName", value = "alb" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
   
-  # 목적지 주소 설정
+  # 목적지 주소 설정 (결과: jenkins.mindlog.cloud)
   set { name = "controller.ingress.hostName", value = "jenkins.${var.domain_name}" }
-  
-  # HTTPS 인증서 설정 (나중에 실제 발급받은 ARN으로 변경하세요)
-  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn", value = "arn:aws:acm:ap-northeast-2:내계정번호:certificate/인증서-고유번호" }
+
+  set { 
+    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
+    value = data.aws_acm_certificate.main.arn 
+  }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports", value = "[{\"HTTPS\":443}, {\"HTTP\":80}]" }
   
-  # WAF 고유번호(ARN) 연동
+  # WAF 방화벽 연동
   set { 
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
+    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
     value = aws_wafv2_web_acl.main.arn 
   }
-  */
+
   depends_on = [
     helm_release.aws_lbc,
     helm_release.aws_ebs_csi_driver
@@ -182,26 +185,29 @@ set {
     name  = "configs.cm.resource\\.customizations\\.ignoreDifferences\\.apps_StatefulSet"
     value = "jqPathExpressions:\n- .spec.replicas"
   }
-/*
-  set { name = "server.ingress.enabled", value = "true" }
-  set { name = "server.ingress.ingressClassName", value = "alb" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
+
+
+  # ALB 도메인 연결을 위한 Ingress 설정
+set { name = "controller.ingress.enabled", value = "true" }
+  set { name = "controller.ingress.ingressClassName", value = "alb" }
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
   
-  # 목적지 주소 설정
-  set { name = "server.ingress.hosts[0]", value = "argocd.${var.domain_name}" }
-  
-  # HTTPS 인증서 설정 (나중에 실제 발급받은 ARN으로 변경하세요)
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn", value = "arn:aws:acm:ap-northeast-2:내계정번호:certificate/인증서-고유번호" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports", value = "[{\"HTTPS\":443}, {\"HTTP\":80}]" }
-  
-    # WAF 고유번호(ARN) 연동
+  # 목적지 주소 설정 (결과: argocd.mindlog.cloud)
+  set { name = "controller.ingress.hostName", value = "argocd.${var.domain_name}" }
+
   set { 
-    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
+    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
+    value = data.aws_acm_certificate.main.arn 
+  }
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports", value = "[{\"HTTPS\":443}, {\"HTTP\":80}]" }
+  
+  # WAF 방화벽 연동
+  set { 
+    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
     value = aws_wafv2_web_acl.main.arn 
   }
-  */
 
   depends_on = [helm_release.aws_lbc]
 }

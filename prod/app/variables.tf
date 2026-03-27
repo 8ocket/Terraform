@@ -10,9 +10,9 @@ variable "env" {
 }
 
 variable "domain_name" {
-  description = "메인 서비스 도메인 주소 (향후 도메인 구매/Route53 등록 후 여기에 입력하세요."
+  description = "메인 서비스 도메인 주소"
   type        = string
-  default     = "" 
+  default     = "mindlog.cloud" 
 }
 
 
