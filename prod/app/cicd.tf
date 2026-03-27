@@ -165,13 +165,7 @@ resource "helm_release" "argocd" {
     value = bcrypt(var.argocd_admin_password)
   }
 
-  set {
-    name  = "configs.params.server\\.insecure"
-    value = "true"
-  }
-
 set {
-    # 테라폼 문법상 마침표(.)는 역슬래시 2개(\\)로 이스케이프해야 에러가 안 납니다.
     name  = "nodeSelector.karpenter\\.sh/capacity-type"
     value = "on-demand"
   }
