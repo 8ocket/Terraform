@@ -127,7 +127,7 @@ set { name = "controller.ingress.enabled", value = "true" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
-  
+  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/ssl-redirect", value = "443" }
   # 목적지 주소 설정 (결과: jenkins.mindlog.cloud)
   set { name = "controller.ingress.hostName", value = "jenkins.${var.domain_name}" }
 
@@ -193,7 +193,10 @@ set { name = "controller.ingress.enabled", value = "true" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
   set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/ssl-redirect", value = "443" }
   
+  # (핵심) ALB가 ArgoCD 파드와 대화할 때 무조건 HTTPS 프로토콜을 사용하도록 강제하여 502 에러를 막습니다.
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/backend-protocol", value = "HTTPS" }
   # 목적지 주소 설정 (결과: argocd.mindlog.cloud)
   set { name = "controller.ingress.hostName", value = "argocd.${var.domain_name}" }
 
