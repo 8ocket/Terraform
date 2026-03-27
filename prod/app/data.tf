@@ -55,7 +55,7 @@ data "aws_route53_zone" "main" {
 
 
 data "aws_acm_certificate" "main" {
-  domain   = "*.mindlog.cloud"  
+  domain   = "mindlog.cloud"  
   statuses = ["ISSUED"] # 발급 완료된 정상 인증서만 가져옵니다.
   most_recent = true    # 가장 최근에 발급된 것을 선택합니다.
 }

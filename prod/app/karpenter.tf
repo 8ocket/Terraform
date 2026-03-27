@@ -134,7 +134,7 @@ resource "kubectl_manifest" "karpenter_node_pool" {
         
       # (요청 사항) 노드가 텅 비면 정확히 3분(180초) 대기 후 노드 삭제
       disruption:
-        consolidationPolicy: WhenUnderutilized
+        consolidationPolicy: WhenEmptyOrUnderutilized
         consolidateAfter: 3m
   YAML
 
