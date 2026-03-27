@@ -188,29 +188,29 @@ set {
 
 
   # ALB 도메인 연결을 위한 Ingress 설정
-set { name = "controller.ingress.enabled", value = "true" }
-  set { name = "controller.ingress.ingressClassName", value = "alb" }
-  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
-  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
-  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/ssl-redirect", value = "443" }
+set { name = "server.ingress.enabled", value = "true" }
+  set { name = "server.ingress.ingressClassName", value = "alb" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/group\\.name", value = "alb-group" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme", value = "internet-facing" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type", value = "ip" }
   
-  # (핵심) ALB가 ArgoCD 파드와 대화할 때 무조건 HTTPS 프로토콜을 사용하도록 강제하여 502 에러를 막습니다.
-  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/backend-protocol", value = "HTTPS" }
-  # 목적지 주소 설정 (결과: argocd.mindlog.cloud)
-  set { name = "controller.ingress.hostName", value = "argocd.${var.domain_name}" }
 
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/ssl-redirect", value = "443" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/backend-protocol", value = "HTTPS" }
+  
+  set { name = "server.ingress.hosts[0]", value = "argocd.${var.domain_name}" }
+
+  # ACM 인증서 동적 연결
   set { 
-    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
+    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
     value = data.aws_acm_certificate.main.arn 
   }
-  set { name = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports", value = "[{\"HTTPS\":443}, {\"HTTP\":80}]" }
+  set { name = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports", value = "[{\"HTTPS\":443}, {\"HTTP\":80}]" }
   
   # WAF 방화벽 연동
   set { 
-    name  = "controller.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
+    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn" 
     value = aws_wafv2_web_acl.main.arn 
   }
 
   depends_on = [helm_release.aws_lbc]
-}
