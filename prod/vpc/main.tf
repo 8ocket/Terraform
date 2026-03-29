@@ -112,22 +112,6 @@ resource "aws_security_group" "db_sg" {
   description = "Security group for RDS and Redis"
   vpc_id      = module.vpc.vpc_id
 
-  # (Inbound) EKS 노드에서 보내는 PostgreSQL(5432) 접속만 딱 집어서 허용합니다.
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_node_sg.id]
-  }
-
-  # (Inbound) EKS 노드에서 보내는 Redis(6379) 접속만 딱 집어서 허용합니다.
-  ingress {
-    from_port       = 6379
-    to_port         = 6379
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_node_sg.id]
-  }
-
   # (Outbound) DB가 밖으로 나갈 일은 제한적이므로 모든 포트를 여는 대신 필요한 통신만 구성하는 것이 안전하지만, 편의상 열어둡니다.
   egress {
     from_port   = 0
