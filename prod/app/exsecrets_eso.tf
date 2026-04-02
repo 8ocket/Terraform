@@ -7,32 +7,33 @@
 
 resource "kubernetes_service" "rds" {
   metadata {
-    # 쿠버네티스 내부에서 호출할 별명입니다. (예: rds.default.svc.cluster.local)
     name      = "rds"
-    # 앱들이 기본적으로 설치될 default 네임스페이스에 생성합니다.
     namespace = "default" 
+    annotations = {
+      "argocd.argoproj.io/compare-options" = "IgnoreExtraneous"
+    }
   }
 
   spec {
 
     type = "ExternalName"
     
-
     external_name = data.terraform_remote_state.db.outputs.rds_endpoint
   }
 }
 
 resource "kubernetes_service" "redis" {
   metadata {
-    # 쿠버네티스 내부에서 호출할 별명입니다. (예: redis.default.svc.cluster.local)
     name      = "redis"
     namespace = "default"
+    annotations = {
+      "argocd.argoproj.io/compare-options" = "IgnoreExtraneous"
+    }
   }
 
   spec {
     type = "ExternalName"
     
-    # db 폴더의 결과에서 Valkey(Redis) 접속 주소를 동적으로 끌어옵니다.
     external_name = data.terraform_remote_state.db.outputs.valkey_endpoint
   }
 }
