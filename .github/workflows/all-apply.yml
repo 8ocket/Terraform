@@ -39,14 +39,14 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-      - name: "2. Apply DB"
-        working-directory: ./prod/db
+      - name: "2. Apply EKS"
+        working-directory: ./prod/eks
         run: |
           terraform init
           terraform apply -auto-approve
 
-      - name: "3. Apply EKS"
-        working-directory: ./prod/eks
+      - name: "3. Apply DB"
+        working-directory: ./prod/db
         run: |
           terraform init
           terraform apply -auto-approve
