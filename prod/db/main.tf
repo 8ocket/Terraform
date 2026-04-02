@@ -161,18 +161,17 @@ resource "aws_security_group_rule" "db_allow_eks_postgres" {
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  
   security_group_id        = data.terraform_remote_state.vpc.outputs.db_sg_id
-  source_security_group_id = data.terraform_remote_state.vpc.outputs.eks_node_sg_id
+  source_security_group_id = data.terraform_remote_state.eks.outputs.node_security_group_id
 }
 
+# ==========================================
 # Redis용 인바운드 규칙
 resource "aws_security_group_rule" "db_allow_eks_redis" {
   type                     = "ingress"
   from_port                = 6379
   to_port                  = 6379
   protocol                 = "tcp"
-  
   security_group_id        = data.terraform_remote_state.vpc.outputs.db_sg_id
-  source_security_group_id = data.terraform_remote_state.vpc.outputs.eks_node_sg_id
+  source_security_group_id = data.terraform_remote_state.eks.outputs.node_security_group_id
 }
