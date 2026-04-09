@@ -1,5 +1,6 @@
 8ocket 인프라스트럭처 (Mindlog 프로젝트)
 **개요**
+
 목적: Mindlog 서비스 운영을 위한 AWS 클라우드 네이티브 인프라 구축 및 자동화
 
 방식: Terraform을 활용한 선언형 인프라스트럭처 코드(IaC, Infrastructure as Code) 적용
