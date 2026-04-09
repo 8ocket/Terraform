@@ -6,7 +6,7 @@
 
 배포: GitHub Actions를 통한 CI/CD 파이프라인 연동 및 형상 관리
 
-**사용 기술 스택 (Tech Stack)**
+**구축 및 사용 기술 스택**
 | 분류 (Category) | 기술 (Technology) | 역할 및 설명 (Description) |
 | :--- | :--- | :--- |
 | **IaC (인프라 코드화)** | **Terraform (v1.14.0)** | 코드를 통한 인프라 자동 구축 및 형상 관리 |
@@ -26,7 +26,7 @@
 
 ---
 
-**폴더 구조 (Directory Structure)**
+**폴더 구조**
 각 폴더는 인프라 생명주기와 의존성에 따라 모듈화되어 있습니다. 배포 시 하향식(순차적)으로 실행됩니다.
 ```
 root/terraform.
@@ -41,7 +41,7 @@ root/terraform.
 └── README.md            # 프로젝트 개요 및 아키텍처 설명
 ```
 
-**인프라 배포 파이프라인 (CI/CD)**
+**인프라 배포 파이프라인**
 GitHub OIDC 기반 인증: AWS 액세스 키 노출 없이 안전한 접근 권한(AssumeRole) 획득
 
 경로 기반 트리거(Path Filtering): prod/vpc/** 변경 시 VPC 파이프라인만 실행되는 등 독립적이고 안전한 배포 지원
