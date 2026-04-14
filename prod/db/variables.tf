@@ -69,3 +69,9 @@ variable "s3_photo_bucket_name" {
   type        = string
   default     = "8ocket-backend-photos-prod" 
 }
+
+variable "enable_eks_sg_rules" {
+  description = "EKS와 DB 간의 보안 그룹 연결을 활성화 또는 비활성화."
+  type        = bool
+  default     = true
+}

@@ -154,9 +154,10 @@ resource "aws_s3_bucket_policy" "backend_photos_public_read" {
   })
 }
 
-# =======================================================
+
 # RDS(PostgreSQL)용 인바운드 규칙
 resource "aws_security_group_rule" "db_allow_eks_postgres" {
+  count                    = var.enable_eks_sg_rules ? 1 : 0
   type                     = "ingress"
   from_port                = 5432
   to_port                  = 5432
@@ -165,9 +166,9 @@ resource "aws_security_group_rule" "db_allow_eks_postgres" {
   source_security_group_id = data.terraform_remote_state.eks.outputs.node_security_group_id
 }
 
-# ==========================================
 # Redis용 인바운드 규칙
 resource "aws_security_group_rule" "db_allow_eks_redis" {
+  count                    = var.enable_eks_sg_rules ? 1 : 0
   type                     = "ingress"
   from_port                = 6379
   to_port                  = 6379
