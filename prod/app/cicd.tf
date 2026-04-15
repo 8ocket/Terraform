@@ -237,5 +237,11 @@ set {
     type  = "string"
   }
 
+  set {
+    name  = "server.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/wafv2-acl-arn"
+    value = aws_wafv2_web_acl.main.arn
+    type  = "string"
+  }
+  
   depends_on = [helm_release.aws_lbc]
 }
