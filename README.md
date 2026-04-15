@@ -19,7 +19,7 @@
 | | **Valkey (v8.2)** | 속도 향상을 위한 초고속 임시 기억 장치 (캐시) |
 | | **Amazon EFS / EBS (gp3)** | 컨테이너 데이터 유실을 막기 위한 고성능 하드디스크 |
 | **CI/CD & Security** | **GitHub Actions** | 인프라 구축 코드(Terraform) 자동 실행 파이프라인 |
-| | **Jenkins** | 개발팀의 앱 코드를 실행 가능한 형태(이미지)로 포장 |
+| | **GitHub Actions** | 개발팀의 앱 코드를 실행 가능한 형태(이미지)로 포장 |
 | | **ArgoCD** | 포장된 앱을 클라우드(EKS)에 자동으로 배포하고 유지 |
 | | **External Secrets Operator**| DB 비밀번호 등 민감 정보를 안전하게 앱에 전달 |
 | | **AWS WAF** | 해킹 및 악의적인 웹 트래픽 자동 차단 방화벽 |
