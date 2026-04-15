@@ -36,8 +36,8 @@ root/terraform.
 │   ├── vpc/             # 네트워크 계층 (VPC, Subnet, NAT, Security Group, VPC Endpoint, EFS)
 │   ├── eks/             # 컴퓨팅 계층 (EKS Cluster, Worker Node 설정)
 │   ├── db/              # 데이터 계층 (RDS PostgreSQL, Valkey, S3 Photo Bucket)
-│   ├── app/             # 쿠버네티스 코어 앱 (ALB Controller, ExternalDNS, Karpenter, Jenkins, ArgoCD 등)
-│   └── ops/             # 운영/모니터링 계층 (Namespace 구성, New Relic License 주입)
+│   ├── app/             # 쿠버네티스 코어 앱 (ALB Controller, ExternalDNS, Karpenter, ArgoCD 등)
+│   └── ops/             # 운영/모니터링 계층 (KEDA 배포, Namespace 구성, New Relic License 주입)
 └── README.md            # 프로젝트 개요 및 아키텍처 설명
 ```
 
