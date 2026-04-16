@@ -136,6 +136,9 @@ resource "helm_release" "external_dns" {
     name  = "txtOwnerId"
     value = data.terraform_remote_state.eks.outputs.cluster_name
   }
+  depends_on = [
+    aws_eks_pod_identity_association.externaldns
+  ]
 }
 
 
