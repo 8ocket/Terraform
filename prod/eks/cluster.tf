@@ -22,7 +22,7 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true
 
   access_entries = {
-    local_admin = {
+    /*local_admin = {
       kubernetes_groups = []
       principal_arn     = var.admin_iam_arn
 
@@ -34,7 +34,7 @@ module "eks" {
           }
         }
       }
-    }
+    */}
   }
 
   # 4. 필수 시스템 애드온 (파드 개수 제한 해제용 vpc-cni 설정 포함)
